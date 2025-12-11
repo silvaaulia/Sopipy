@@ -5,44 +5,66 @@
 
     <h2 class="text-2xl font-bold mb-6">Keranjang Belanja</h2>
 
-    @if(session('cart') && count(session('cart')) > 0)
+    {{-- Notifikasi Sukses --}}
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    {{-- Menggunakan $cartItems dari Controller --}}
+    @if($cartItems && count($cartItems) > 0)
+        
         <div class="space-y-6">
 
             @php
                 $totalPrice = 0;
             @endphp
 
-            @foreach(session('cart') as $id => $item)
+            @foreach($cartItems as $item)
                 @php
-                    $itemTotal = $item['price'] * $item['quantity'];
+                    $itemTotal = $item->product->price * $item->quantity; 
                     $totalPrice += $itemTotal;
                 @endphp
 
                 <div class="flex flex-col md:flex-row justify-between items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
                     {{-- Gambar --}}
-                    <img src="{{ asset('storage/'.$item['image']) }}" alt="{{ $item['name'] }}" class="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg">
+                    <img src="{{ asset('storage/'.$item->product->image) }}" alt="{{ $item->product->name }}" class="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg">
 
                     {{-- Detail Produk --}}
                     <div class="flex-1 md:ml-6 mt-3 md:mt-0">
-                        <h3 class="font-semibold text-gray-800">{{ $item['name'] }}</h3>
-                        <p class="text-orange-600 font-bold mt-1">Rp {{ number_format($item['price']) }}</p>
+                        <h3 class="font-semibold text-gray-800">{{ $item->product->name }}</h3>
+                        <p class="text-orange-600 font-bold mt-1">Rp {{ number_format($item->product->price) }}</p>
 
                         {{-- Quantity --}}
-                        <div class="flex items-center mt-2 space-x-2">
-                            <form action="{{ route('cart.update', $id) }}" method="POST" class="flex items-center space-x-2">
+                        <div class="flex items-center mt-2 space-x-4">
+                            
+                            {{-- Form Update Kuantitas --}}
+                            {{-- Menggunakan $item->id (ID ITEM KERANJANG) --}}
+                            <form action="{{ route('cart.update', $item->id) }}" method="POST" class="flex items-center space-x-2">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" name="action" value="decrease" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">-</button>
-                                <input type="text" name="quantity" value="{{ $item['quantity'] }}" class="w-10 text-center border rounded">
-                                <button type="submit" name="action" value="increase" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">+</button>
+                                
+                                {{-- Tombol minus --}}
+                                <button type="submit" name="quantity" value="{{ max(1, $item->quantity - 1) }}" 
+                                        class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">-</button>
+                                
+                                <span class="w-10 text-center border rounded">{{ $item->quantity }}</span>
+                                
+                                {{-- Tombol plus --}}
+                                <button type="submit" name="quantity" value="{{ $item->quantity + 1 }}" 
+                                        class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">+</button>
                             </form>
-                            <span class="text-gray-500">Subtotal: Rp {{ number_format($itemTotal) }}</span>
+
+                            <span class="text-gray-500">Subtotal: <span class="font-bold text-gray-700">Rp {{ number_format($itemTotal) }}</span></span>
                         </div>
                     </div>
 
                     {{-- Hapus Produk --}}
-                    <form action="{{ route('cart.remove', $id) }}" method="POST" class="mt-3 md:mt-0">
+                    {{-- Menggunakan $item->id (ID ITEM KERANJANG) --}}
+                    <form action="{{ route('cart.remove', $item->id) }}" method="POST" class="mt-3 md:mt-0">
                         @csrf
+                        @method('DELETE') 
                         <button class="text-red-500 hover:underline">Hapus</button>
                     </form>
                 </div>

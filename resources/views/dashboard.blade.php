@@ -28,7 +28,7 @@
     </div>
 
     {{-- Flash Sale --}}
-    <section>
+    {{-- <section>
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-orange-600">🔥 Flash Sale</h3>
             <a class="text-sm text-gray-600 hover:text-gray-800 cursor-pointer">Lihat Semua ></a>
@@ -45,7 +45,7 @@
                 </p>
 
                 {{-- Tambah Keranjang --}}
-                <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                {{-- <form action="{{ route('cart.add', $product->id) }}" method="POST">
                     @csrf
                     <button class="bg-orange-500 text-white px-4 py-2 rounded-lg mt-3 w-full text-sm hover:bg-orange-600">
                         + Keranjang
@@ -54,24 +54,29 @@
             </div>
             @endforeach
         </div>
-    </section>
+    </section> --}} 
 
-    {{-- Rekomendasi --}}
+  {{-- Rekomendasi --}}
     <section>
         <h3 class="text-lg font-bold text-gray-900 mb-4">✨ Rekomendasi Untuk Kamu</h3>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-            @for ($i = 1; $i <= 12; $i++)
+            
+            {{-- UBAH: Ganti @for dengan @foreach ($products) --}}
+            @foreach ($products as $product)
             <div class="bg-white rounded-xl border hover:shadow-lg transition">
-                <img src="https://source.unsplash.com/300x300/?product,{{ $i }}"
+                
+                {{-- Gunakan data produk asli di sini --}}
+                <img src="{{ asset('storage/'.$product->image) }}"
                      class="w-full h-40 object-cover rounded-t-xl">
 
                 <div class="p-3 space-y-2">
-                    <p class="text-xs line-clamp-2">Barang Pilihan {{ $i }}</p>
+                    <p class="text-xs line-clamp-2">{{ $product->name }}</p>
                     <p class="text-orange-600 font-bold text-sm">
-                        Rp {{ rand(10,99) }}.999
+                        Rp {{ number_format($product->price) }}
                     </p>
 
-                    <form method="POST" action="{{ route('cart.add', rand(1,12)) }}">
+                    {{-- Form menggunakan ID produk yang asli --}}
+                    <form method="POST" action="{{ route('cart.add', $product->id) }}">
                         @csrf
                         <button class="w-full bg-gray-900 text-white rounded-lg py-1 text-sm hover:bg-black">
                             + Keranjang
@@ -80,7 +85,8 @@
 
                 </div>
             </div>
-            @endfor
+            @endforeach
+            
         </div>
     </section>
 
